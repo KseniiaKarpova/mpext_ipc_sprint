@@ -2,6 +2,10 @@
 
 link to git -> 
 
+Требуется заполнить в .env
+`AUTH_GOOGLE_CLIENT_ID=`
+`AUTH_GOOGLE_CLIENT_SECRET=`
+
 ## Запуск проекта:
 ```bash
 
