@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch-logs-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch-logs-app
+  template:
+    metadata:
+      labels:
+        app: elasticsearch-logs-app
+    spec:
+      containers:
+      - name: elasticsearch-container
+        image: elasticsearch:8.10.2
+        env:
+        - name: discovery.type
+          value: "single-node"
+        - name: bootstrap.memory_lock
+          value: "true"
+        - name: ES_JAVA_OPTS
+          value: "-Xms265m -Xmx265m"
+        - name: xpack.security.enabled
+          value: "false"
+        volumeMounts:
+        - name: es-data
+          mountPath: /tmp/elasticsearch/data
+        resources:
+          limits:
+            memory: "1024Mi"
+            cpu: "2"
+          requests:
+            memory: "128Mi"
+            cpu: "500m"
+      volumes:
+      - name: es-data
+        persistentVolumeClaim:
+          claimName: log-pvc

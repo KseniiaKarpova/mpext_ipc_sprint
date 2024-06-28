@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: auth-api-migrations-job
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 100
+  template:
+    spec:
+      containers:
+      - name: auth-api-container
+        image: auth_api:latest
+        envFrom:
+          - secretRef:
+              name: secret-env
+        imagePullPolicy: Never
+        args:
+        - /bin/sh
+        - -c
+        - poetry run alembic upgrade head
+      restartPolicy: Never
