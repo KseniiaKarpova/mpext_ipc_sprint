@@ -13,6 +13,8 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from redis.asyncio import Redis
 from utils.jaeger import configure_tracer
 from utils.constraint import RequestLimit
+from prometheus_fastapi_instrumentator import Instrumentator
+
 
 settings = config.Settings()
 
@@ -28,6 +30,7 @@ async def lifespan(app: FastAPI):
     redis.redis = Redis(host=settings.redis_host, port=settings.redis_port)
     elastic.es = AsyncElasticsearch(
         hosts=[f'http://{settings.es_host}:{settings.es_port}'])
+
     yield
     await redis.redis.close()
     await elastic.es.close()
@@ -41,10 +44,14 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
     lifespan=lifespan
 )
-
+Instrumentator().instrument(app).expose(app)
 
 @app.middleware('http')
 async def before_request(request: Request, call_next):
+    if "/metrics" in str(request.url):
+        response = await call_next(request)
+        return response
+
     user = request.headers.get('X-Forwarded-For')
     result = await RequestLimit().is_over_limit(user=user)
     if result:

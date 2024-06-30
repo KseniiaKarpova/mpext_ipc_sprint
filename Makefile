@@ -8,7 +8,7 @@ configure-env:
 	eval $(minikube docker-env)
 
 build:
-	docker build Auth/. -t auth_api:latest && docker build ReviewsAPI/. -t reviews:latest:
+	docker build AuthAPI/. -t auth_api:latest && docker build ReviewsAPI/. -t reviews:latest:
 
 apply-all:
 	kubectl apply -f k8s/.
