@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-api-app
+  template:
+    metadata:
+      labels:
+        app: auth-api-app
+    spec:
+      containers:
+      - name: auth-api-container
+        image: auth_api:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 9999
+        envFrom:
+        - secretRef:
+            name: secret-env
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        command: ["poetry"]
+        args: ["run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9999", "--reload"]
+      volumes:
+      - name: app-storage
+        persistentVolumeClaim:
+          claimName: auth-pvc

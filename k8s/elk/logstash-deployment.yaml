@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+      - name: logstash
+        image: logstash:8.10.2
+        env:
+        - name: XPACK_MONITORING_ENABLED
+          value: "false"
+        - name: ES_HOST
+          value: "elasticsearch-logs.default.svc.cluster.local:9200"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+        command: ["logstash", "-f", "/config/logstash.conf"]
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+      volumes:
+      - name: config-volume
+        configMap:
+          name: logstash-config

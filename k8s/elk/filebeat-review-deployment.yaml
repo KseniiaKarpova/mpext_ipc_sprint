@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebeat-review-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: filebeat-review
+  template:
+    metadata:
+      labels:
+        app: filebeat-review
+    spec:
+      containers:
+      - name: filebeat
+        image: elastic/filebeat:8.10.2
+        volumeMounts:
+        - name: log-volume
+          mountPath: /var/app/log
+        - name: config-volume
+          mountPath: /usr/share/filebeat/filebeat.yaml
+          subPath: filebeat.yaml
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: log-volume
+        persistentVolumeClaim:
+          claimName: log-pvc
+      - name: config-volume
+        configMap:
+          name: filebeat-review-config
