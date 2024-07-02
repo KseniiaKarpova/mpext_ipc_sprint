@@ -14,7 +14,7 @@ from redis.asyncio import Redis
 from utils.jaeger import configure_tracer
 from utils.constraint import RequestLimit
 from prometheus_fastapi_instrumentator import Instrumentator, metrics
-from utils.metrics import http_requested_languages_total
+from utils.metrics import http_requested_languages_total, request_limit_exceeded
 
 settings = config.Settings()
 
@@ -49,6 +49,7 @@ instrumentator = Instrumentator().instrument(app,
                                              metric_namespace=settings.project_name.replace(" ", '_'),
                                              metric_subsystem=settings.project_name.replace(" ", '_')).expose(app)
 instrumentator.add(http_requested_languages_total())
+instrumentator.add(request_limit_exceeded())
 instrumentator.add(metrics.default())
 instrumentator.expose(app)
 
