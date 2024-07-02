@@ -283,10 +283,13 @@ services:
     container_name: grafana
     ports:
       - 3000:3000
-    volumes:
-      - grafana_data:/var/lib/grafana
     networks:
       - application_network
+    volumes:
+      - ./grafana_provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+
+
 
 networks:
   application_network:

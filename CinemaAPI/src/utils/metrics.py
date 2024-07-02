@@ -11,7 +11,7 @@ def http_requested_languages_total() -> Callable[[Info], None]:
 
     def instrumentation(info: Info) -> None:
         langs = set()
-        lang_str = info.request.headers["Accept-Language"]
+        lang_str = info.request.headers.get("Accept-Language", 'None')
         for element in lang_str.split(","):
             element = element.split(";")[0].strip().lower()
             langs.add(element)
@@ -19,3 +19,22 @@ def http_requested_languages_total() -> Callable[[Info], None]:
             METRIC.labels(language).inc()
 
     return instrumentation
+
+
+#def http_response_() -> Callable[[Info], None]:
+#    METRIC = Counter(
+#        "http_requested_languages_total",
+#        "Number of times a certain language has been requested.",
+#        labelnames=("langs",)
+#    )
+#
+#    def instrumentation(info: Info) -> None:
+#        langs = set()
+#        lang_str = info.request.headers["Accept-Language"]
+#        for element in lang_str.split(","):
+#            element = element.split(";")[0].strip().lower()
+#            langs.add(element)
+#        for language in langs:
+#            METRIC.labels(language).inc()
+#
+#    return instrumentation
