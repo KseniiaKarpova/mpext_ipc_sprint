@@ -31,4 +31,4 @@ RUN chown www-data:www-data /var/log && \
      python3 manage.py migrate --no-input && \
      python3 manage.py makemigrations movies && \
      python3 manage.py migrate movies --no-input && \
-     python manage.py createsuperuser --noinput || true
+     python manage.py createsuperuser --username=admin --email=admin@example.com --password=admin || true

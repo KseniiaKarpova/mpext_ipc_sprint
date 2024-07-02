@@ -16,7 +16,7 @@ services:
     volumes:
       - ./ReviewsAPI:/opt/app
       - logs:/opt/logs
-    command: poetry run uvicorn main:app --host 0.0.0.0 --port 3000 --reload
+    command: poetry run uvicorn main:app --host 0.0.0.0 --port 3003 --reload
     depends_on:
       mongos:
         condition: service_healthy
@@ -129,8 +129,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./DjangoAdmin:/app
-      - static_volume:/app/static
+      - static_volume:/app/staticfiles
       - media_volume:/app/media
     depends_on:
       cinema_postgres:
@@ -138,9 +137,10 @@ services:
     networks:
       - application_network
 
+
 #_____________content______________
   cinema_api:
-    container_name: cinema-api
+    container_name: cinema_api
     image: cinema_api
     command: gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8002 --reload
     env_file:
@@ -151,8 +151,8 @@ services:
       ES_PORT: ${ES_PORT}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
-    expose:
-      - 8002
+    ports:
+      - '8012:8002'
     build:
       context: CinemaAPI
       dockerfile: Dockerfile
@@ -258,12 +258,36 @@ services:
       - "8007:8007"
       - "8008:8008"
       - "8009:8009"
-      - "3000:3000"
+      - "3003:3003"
       - "7070:7070"
     networks:
       - application_network
-  
 
+
+#______________View Metrics_______________
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - application_network
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    networks:
+      - application_network
+    volumes:
+      - ./grafana_provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
 
 
 
@@ -271,4 +295,6 @@ networks:
   application_network:
 
 volumes:
+  prometheus-data:
+  grafana_data:
   logs:

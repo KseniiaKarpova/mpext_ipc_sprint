@@ -248,6 +248,17 @@ services:
     networks:
       - application_network
 
+  data_transfer_sqlite_to_pg:
+    build:
+      context: data_transfer_sqlite_to_pg
+      dockerfile: Dockerfile
+    container_name: data_transfer
+    ports:
+      - "8877:8877"
+    env_file:
+      - .env
+    networks:
+      - application_network
 
   file_postgres:
     image: postgres:15.5-alpine3.19
@@ -259,8 +270,6 @@ services:
       - POSTGRES_USER=${FILE_POSTGRES_USER}
       - POSTGRES_DB=${FILE_POSTGRES_NAME}
       - POSTGRES_PORT=${FILE_POSTGRES_PORT}
-    expose:
-      - 5432
     volumes:
       - file_data:/var/lib/postgresql/data
     healthcheck:
