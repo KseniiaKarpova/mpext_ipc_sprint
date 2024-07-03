@@ -6,11 +6,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: kibana-logs
+      app: kibana-logs-app
   template:
     metadata:
       labels:
-        app: kibana-logs
+        app: kibana-logs-app
     spec:
       containers:
       - name: kibana

@@ -1,16 +1,17 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: elasticsearch-logs-deployment
+  name: elasticsearch-statefulset
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: elasticsearch-logs-app
+      app: elasticsearch-app
+  serviceName: "elasticsearch-statefulset"
   template:
     metadata:
       labels:
-        app: elasticsearch-logs-app
+        app: elasticsearch-app
     spec:
       containers:
       - name: elasticsearch-container
@@ -25,7 +26,7 @@ spec:
         - name: xpack.security.enabled
           value: "false"
         volumeMounts:
-        - name: es-log-data
+        - name: es-data
           mountPath: /tmp/elasticsearch/data
         resources:
           limits:
@@ -35,6 +36,6 @@ spec:
             memory: "128Mi"
             cpu: "500m"
       volumes:
-      - name: es-log-data
+      - name: es-data
         persistentVolumeClaim:
-          claimName: log-pvc
+          claimName: es-pvc

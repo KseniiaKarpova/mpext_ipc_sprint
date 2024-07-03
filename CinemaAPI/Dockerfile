@@ -4,6 +4,8 @@ ENV TZ=Europe/Moscow
 
 WORKDIR /app
 
+ENV PYTHONPATH=/app/src
+
 COPY requirements.txt .
 RUN apt-get update
 

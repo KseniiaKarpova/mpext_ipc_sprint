@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cinema-postgres-init-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: cinema-postgres-init
+        image: postgres:15.5-alpine3.19
+        envFrom:
+        - secretRef:
+            name: secret-env
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: CINEMA_POSTGRES_NAME
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: CINEMA_POSTGRES_PASSWORD
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: CINEMA_POSTGRES_USER
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Waiting for PostgreSQL to be ready..."
+            until pg_isready -h cinema-postgres-service -p 5432; do
+              echo "Waiting for database connection..."
+              sleep 2
+            done
+            echo "PostgreSQL is ready"
+            export PGPASSWORD="$POSTGRES_PASSWORD"
+            echo "CREATE SCHEMA IF NOT EXISTS content;" | psql -h cinema-postgres-service -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            echo "ALTER ROLE $POSTGRES_USER SET search_path = content, public;" | psql -h cinema-postgres-service -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+      restartPolicy: OnFailure

@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: worker-mongo-statefulset
+spec:
+  selector:
+    matchLabels:
+      app: worker-mongo-app
+  serviceName: "worker-mongo-statefulset"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: worker-mongo-app
+    spec:
+      containers:
+        - name: worker-mongo-container
+          image: mongo:5.0.21
+          args: ["--dbpath", "/data/db"]
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: NOTIFICATIONS_MONGO_DB_USER
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret-env
+                  key: NOTIFICATIONS_MONGO_DB_PASSWORD
+            - name: MONGO_INITDB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  key: NOTIFICATIONS_MONGO_DB_NAME
+                  name: secret-env
+          command:
+            - mongod
+            - "--bind_ip_all"
+          volumeMounts:
+            - name: mongo-volume
+              mountPath: /data/db
+      volumes:
+        - name: mongodb-config
+          configMap:
+            name: mongodb-config
+            items:
+              - key: mongodb.conf
+                path: mongodb.conf
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-volume
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 1Gi

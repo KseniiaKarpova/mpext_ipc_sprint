@@ -26,3 +26,56 @@ spec:
                 name: reviews-api-service
                 port:
                   number: 3000
+    - host: p2f.local.admin
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: admin-service
+                port:
+                  number: 8003
+    - host: p2f.local.cinema.api
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cinema-api-service
+                port:
+                  number: 8002
+
+    - host: p2f.local.file.api
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: file-service
+                port:
+                  number: 7070
+
+    - host: p2f.local.worker.api
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: worker-api-service
+                port:
+                  number: 9998
+
+    - host: p2f.local.ws
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ws-service
+                port:
+                  number: 9992

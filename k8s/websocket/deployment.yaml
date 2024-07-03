@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ws-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ws-app
+  template:
+    metadata:
+      labels:
+        app: ws-app
+    spec:
+      containers:
+      - name: ws-container
+        image: ws:latest
+        imagePullPolicy: Never
+        command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9992", "--reload"]
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+        ports:
+        - containerPort: 9992
+        volumeMounts:
+        - mountPath: /src
+          name: ws-volume
+      volumes:
+      - name: ws-volume
+        persistentVolumeClaim:
+          claimName: ws-pvc

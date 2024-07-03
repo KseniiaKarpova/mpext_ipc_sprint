@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: etl-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: etl-app
+  template:
+    metadata:
+      labels:
+        app: etl-app
+    spec:
+      containers:
+      - name: etl-container
+        image: etl:new
+        command: ["python3", "main.py"]
+        env:
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: CINEMA_POSTGRES_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: CINEMA_POSTGRES_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: CINEMA_POSTGRES_PASSWORD
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: CINEMA_POSTGRES_HOST
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: CINEMA_POSTGRES_PORT
+        envFrom:
+        - secretRef:
+            name: secret-env
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: src-code
+        persistentVolumeClaim:
+          claimName: etl-src-pvc
