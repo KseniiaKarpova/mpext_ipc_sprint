@@ -3,7 +3,7 @@ from logging import config as logging_config
 
 from core.logger import LOGGING
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Применяем настройки логирования
 logging_config.dictConfig(LOGGING)
@@ -14,14 +14,22 @@ class BucketSettings(BaseSettings):
     movies_path: str = Field('movie/')
 
 
+class MinioSettings(BaseSettings):
+    host: str = ...
+    port: int = ...
+    user: str = ...
+    password: str = ...
+    model_config: str = SettingsConfigDict(env_prefix='s3_')
+
+    @property
+    def endpoint(self):
+        return f'{self.host}:{self.port}'
+
+
 class Settings(BaseSettings):
     project_name: str = os.getenv('PROJECT_NAME', 'File API')
 
-    minio_host: str = os.getenv('S3_HOST', 'minio')
-    minio_port: int = os.getenv('S3_PORT', 9000)
-    minio_user: str = os.getenv('S3_USER', 'adminS3')
-    minio_password: str = os.getenv('S3_PASSWORD', 'adminS3pass')
-
+    minio: MinioSettings = MinioSettings()
     observer_host: str = os.getenv('FILE_POSTGRES_HOST')
     observer_port: int = os.getenv('FILE_POSTGRES_PORT')
     observer_user: str = os.getenv('FILE_POSTGRES_USER')

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: file-api-app
+  template:
+    metadata:
+      labels:
+        app: file-api-app
+    spec:
+      containers:
+      - name: file-api-container
+        image: file_api:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 7070
+        envFrom:
+        - secretRef:
+            name: secret-env
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        command: ["gunicorn", "main:app", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:7070", "--reload"]
+      volumes:
+      - name: app-storage
+        persistentVolumeClaim:
+          claimName: file-api-pvc

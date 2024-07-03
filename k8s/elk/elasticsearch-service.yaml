@@ -8,4 +8,4 @@ spec:
       targetPort: 9200
       protocol: TCP
   selector:
-    app: elasticsearch-logs
+    app: elasticsearch-logs-app

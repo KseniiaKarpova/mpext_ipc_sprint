@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cinema-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cinema-api-app
+  template:
+    metadata:
+      labels:
+        app: cinema-api-app
+    spec:
+      containers:
+      - name: cinema-api-container
+        image: cinema_api:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8002
+        envFrom:
+        - secretRef:
+            name: secret-env
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        command: ["gunicorn", "main:app", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8002", "--reload"]
+      volumes:
+      - name: app-storage
+        persistentVolumeClaim:
+          claimName: cinema-pvc

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker-api-app
+  template:
+    metadata:
+      labels:
+        app: worker-api-app
+    spec:
+      containers:
+      - name: worker-api-container
+        image: worker:latest
+        imagePullPolicy: Never
+        envFrom:
+        - secretRef:
+            name: secret-env
+        command: ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9998", "--reload"]
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+        ports:
+        - containerPort: 9998
+      volumes:
+      - name: worker-volume
+        persistentVolumeClaim:
+          claimName: worker-api-pvc

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: file-postgres-statefulset
+spec:
+  serviceName: file-postgres-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: file-postgres-app
+  template:
+    metadata:
+      labels:
+        app: file-postgres-app
+    spec:
+      containers:
+      - name: file-postgres
+        image: postgres:15.5-alpine3.19
+        ports:
+        - containerPort: 5432
+          name: postgres-cli
+        envFrom:
+        - secretRef:
+            name: secret-env
+        env:
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: FILE_POSTGRES_NAME
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: FILE_POSTGRES_PASSWORD
+        - name: POSTGRES_PORT
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: FILE_POSTGRES_PORT
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: secret-env
+              key: FILE_POSTGRES_USER
+        volumeMounts:
+        - mountPath: "/var/lib/postgresql/data/"
+          name: file-postgres-pvc
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "750m"
+  volumeClaimTemplates:
+    - metadata:
+        name: file-postgres-pvc
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Mi

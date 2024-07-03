@@ -18,9 +18,9 @@ settings = config.Settings()
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     minio.minio = Minio(
-        endpoint=f'{settings.minio_host}:{settings.minio_port}',
-        access_key=settings.minio_user,
-        secret_key=settings.minio_password,
+        endpoint=settings.minio.endpoint,
+        access_key=settings.minio.user,
+        secret_key=settings.minio.password,
         secure=False,
     )
     result = await minio.minio.bucket_exists(config.bucket_settings.bucket_movies)

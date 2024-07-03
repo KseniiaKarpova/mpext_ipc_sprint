@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: file-api-migrations-job
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 100
+  template:
+    spec:
+      containers:
+      - name: file-api-container
+        image: file_api:latest
+        envFrom:
+          - secretRef:
+              name: secret-env
+        imagePullPolicy: Never
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          alembic upgrade head
+      restartPolicy: Never

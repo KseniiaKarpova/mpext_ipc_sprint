@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: django-admin-migrations-job
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 100
+  template:
+    spec:
+      containers:
+      - name: auth-api-container
+        image: cinema_admin:latest
+        envFrom:
+          - secretRef:
+              name: secret-env
+        imagePullPolicy: Never
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          echo "Waiting for PostgreSQL to be ready..."
+          while ! (nc -z cinema-postgres-service.default.svc.cluster.local 5432); do
+            sleep 0.1
+          done
+          echo "PostgreSQL is ready"
+          python3 manage.py collectstatic --no-input --clear
+          python3 manage.py makemigrations users
+          python3 manage.py migrate users --no-input
+          python3 manage.py migrate --no-input
+          python3 manage.py makemigrations movies
+          python3 manage.py migrate movies --no-input
+          python manage.py createsuperuser --noinput || true
+      restartPolicy: Never

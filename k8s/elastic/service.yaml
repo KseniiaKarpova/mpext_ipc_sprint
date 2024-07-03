@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-service
+spec:
+  ports:
+    - name: elasticsearch-statefulset
+      port: 9200
+      targetPort: 9200
+  clusterIP: None
+  selector:
+    app: elasticsearch-app
