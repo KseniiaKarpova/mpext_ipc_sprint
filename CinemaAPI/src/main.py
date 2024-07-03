@@ -13,6 +13,8 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from redis.asyncio import Redis
 from utils.jaeger import configure_tracer
 from utils.constraint import RequestLimit
+from prometheus_fastapi_instrumentator import Instrumentator, metrics
+from utils.metrics import http_requested_languages_total, request_limit_exceeded
 
 settings = config.Settings()
 
@@ -28,6 +30,8 @@ async def lifespan(app: FastAPI):
     redis.redis = Redis(host=settings.redis_host, port=settings.redis_port)
     elastic.es = AsyncElasticsearch(
         hosts=[f'http://{settings.es_host}:{settings.es_port}'])
+
+
     yield
     await redis.redis.close()
     await elastic.es.close()
@@ -41,10 +45,21 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
     lifespan=lifespan
 )
+instrumentator = Instrumentator().instrument(app,
+                                             metric_namespace=settings.project_name.replace(" ", '_'),
+                                             metric_subsystem=settings.project_name.replace(" ", '_')).expose(app)
+instrumentator.add(http_requested_languages_total())
+instrumentator.add(request_limit_exceeded())
+instrumentator.add(metrics.default())
+instrumentator.expose(app)
 
 
 @app.middleware('http')
 async def before_request(request: Request, call_next):
+    if "/metrics" in str(request.url):
+        response = await call_next(request)
+        return response
+
     user = request.headers.get('X-Forwarded-For')
     result = await RequestLimit().is_over_limit(user=user)
     if result:
@@ -63,6 +78,7 @@ async def before_request(request: Request, call_next):
 
 
 FastAPIInstrumentor.instrument_app(app)
+
 
 app.include_router(films.router, prefix='/api/v1/films', tags=['films'])
 app.include_router(genres.router, prefix='/api/v1/genres', tags=['genres'])
