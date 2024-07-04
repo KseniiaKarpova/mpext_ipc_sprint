@@ -1,6 +1,6 @@
 # Проект спринта финального модуля
 
-link to git -> 
+link to git -> https://github.com/KseniiaKarpova/mpext_ipc_sprint
 
 Требуется заполнить в .env
 `AUTH_GOOGLE_CLIENT_ID=`
