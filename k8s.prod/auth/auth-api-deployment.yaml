@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-api-deployment-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-api-app-prod
+  template:
+    metadata:
+      labels:
+        app: auth-api-app-prod
+    spec:
+      containers:
+      - name: auth-api-container-prod
+        image: nozirdev/auth_api:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9999
+        envFrom:
+        - secretRef:
+            name: secret-env-prod
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        command: ["poetry"]
+        args: ["run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9999", "--reload"]
+      volumes:
+      - name: app-storage-prod
+        persistentVolumeClaim:
+          claimName: auth-pvc-prod

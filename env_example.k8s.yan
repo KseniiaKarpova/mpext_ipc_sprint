@@ -25,10 +25,12 @@ AUTH_API_PORT=9999
 REDIS_HOST=redis.default.svc.cluster.local
 REDIS_PORT=6379
 
-AUTH_POSTGRES_HOST=auth-postgres-service.default.svc.cluster.local
-AUTH_POSTGRES_PASSWORD=123qwe
+AUTH_POSTGRES_HOST=c-c9q4lfalk7i32q2n71p7.rw.mdb.yandexcloud.net
+#auth-postgres-service.default.svc.cluster.local
+AUTH_POSTGRES_PASSWORD=auth_postgres
 AUTH_POSTGRES_USER=app
-AUTH_POSTGRES_DB=auth_database
+AUTH_POSTGRES_DB=auth_postgres
+#auth_database
 AUTH_POSTGRES_PORT=5432
 
 JAEGER_HOST=auth_jaeger

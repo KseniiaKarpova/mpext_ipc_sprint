@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-ingress-prod
+
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: p2f.production
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service-prod
+                port:
+                  number: 9999
