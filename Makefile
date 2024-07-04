@@ -17,6 +17,7 @@ build:
 	docker build Worker/. -t worker:latest
 	docker build WebSocket/. -t ws:latest
 
+
 apply-all:
 	kubectl apply -f k8s/auth
 	kubectl apply -f k8s/cinema
@@ -28,6 +29,7 @@ apply-all:
 	kubectl apply -f k8s/webscoket
 	kubectl apply -f k8s/s3
 	kubectl apply -f k8s/.
+
 
 delete-all:
 	kubectl delete -f k8s/auth
@@ -45,6 +47,9 @@ delete-all:
 make-secrets:
 	kubectl create secret generic secret-env --from-env-file .env.k8s
 
+make-prod-secrets:
+	kubectl create secret generic secret-env-prod --from-env-file .env.k8s.yan
+
 make-alias:
 	alias k8yc="kubectl --kubeconfig=$HOME/.kube/config-yc"
 
@@ -52,3 +57,23 @@ all: mini-start mini-ingress build apply-all
 
 tunnel:
 	minikube tunnel
+
+
+configure-yc:
+	yc managed-kubernetes cluster get-credentials <cluster_id> --external
+
+
+prod-ingress:
+	helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+	helm repo update
+	helm install ingress-nginx ingress-nginx/ingress-nginx
+
+
+apply-prod:
+	kubectl apply -f k8s.prod/auth
+	kubectl apply -f k8s.prod/.
+
+
+delete-prod:
+	kubectl delete -f k8s.prod/auth
+	kubectl delete -f k8s.prod/.
